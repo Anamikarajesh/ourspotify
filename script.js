@@ -1,122 +1,131 @@
 console.log("Welcome to Spotify");
 
 // Initialize the Variables
-let songindex = 0;
-let audioelement = new Audio('songs/1.mp3');
-let masterplay = document.getElementById('masterplay');
-let myprogressbar = document.getElementById('myprogressbar');
-let gif = document.getElementById('gif');
-let mastersongname = document.getElementById('mastersongname');
-let songitems = Array.from(document.getElementsByClassName('songitem'));
-let songitemplays = Array.from(document.getElementsByClassName('songitemplay'));
+let songIndex = 0;
+let audioElement = new Audio('songs/1.mp3');
+let masterPlay = document.getElementById('masterplay');
+let myProgressBar = document.getElementById('myprogressbar');
+let masterSongName = document.getElementById('mastersongname');
+let songItems = Array.from(document.getElementsByClassName('songitem'));
+let songItemPlays = Array.from(document.getElementsByClassName('songitemplay'));
+let songPoster = document.querySelector('.song-poster');
 
 let songs = [
-    {songname: "Warriyo - Mortals [NCS Release]", filepath: "songs/1.mp3", coverpath: "covers/1.jpg"},
-    {songname: "Cielo - Huma-Huma", filepath: "songs/2.mp3", coverpath: "covers/2.jpg"},
-    {songname: "DEAF KEV - Invincible [NCS Release]", filepath: "songs/3.mp3", coverpath: "covers/3.jpg"},
-    {songname: "Different Heaven & EH!DE - My Heart [NCS Release]", filepath: "songs/4.mp3", coverpath: "covers/4.jpg"},
-    {songname: "Janji - Heroes Tonight (feat. Johnning) [NCS Release]", filepath: "songs/5.mp3", coverpath: "covers/5.jpg"},
-    {songname: "Rabba - Salam-e-Ishq", filepath: "songs/6.mp3", coverpath: "covers/6.jpg"},
-    {songname: "Sakhiyaan - Salam-e-Ishq", filepath: "songs/7.mp3", coverpath: "covers/7.jpg"},
-    {songname: "Bhula Dena - Salam-e-Ishq", filepath: "songs/8.mp3", coverpath: "covers/8.jpg"},
-    {songname: "Tumhari Kasam - Salam-e-Ishq", filepath: "songs/9.mp3", coverpath: "covers/9.jpg"},
-    {songname: "Na Jaana - Salam-e-Ishq", filepath: "songs/10.mp3", coverpath: "covers/10.jpg"},
+    {songName: "Birds Of Feather", filePath: "songs/1.mp3", coverPath: "covers/1.jpg"},
+    {songName: "Die With a Smile", filePath: "songs/2.mp3", coverPath: "covers/2.jpg"},
+    {songName: "Those Eyes", filePath: "songs/3.mp3", coverPath: "covers/3.jpg"},
+    {songName: "Blue", filePath: "songs/4.mp3", coverPath: "covers/4.jpg"},
+    {songName: "I Wanna be Yours", filePath: "songs/5.mp3", coverPath: "covers/5.jpg"},
+    {songName: "This Town", filePath: "songs/6.mp3", coverPath: "covers/6.jpg"},
+    {songName: "Thinking Out Loud", filePath: "songs/7.mp3", coverPath: "covers/7.jpg"},
+    {songName: "My Love Mine All Mine", filePath: "songs/8.mp3", coverPath: "covers/8.jpg"},
+    {songName: "Can't Help Falling in Love", filePath: "songs/9.mp3", coverPath: "covers/9.jpg"},
+    {songName: "Thousand Years", filePath: "songs/10.mp3", coverPath: "covers/10.jpg"},
 ];
 
 // Update song list UI
-songitems.forEach((element, i) => { 
-    element.getElementsByTagName("img")[0].src = songs[i].coverpath; 
-    element.getElementsByClassName("songname")[0].innerText = songs[i].songname; 
+songItems.forEach((element, i) => {
+    element.getElementsByTagName("img")[0].src = songs[i].coverPath;
+    element.getElementsByClassName("songname")[0].innerText = songs[i].songName;
 });
 
-// Function to reset all small play buttons
-const makeallplays = () => {
-    songitemplays.forEach((element) => {
+// Function to reset all play buttons
+const makeAllPlays = () => {
+    songItemPlays.forEach((element) => {
         element.classList.remove('fa-circle-pause');
         element.classList.add('fa-circle-play');
     });
 };
 
-// Handle play/pause click
-masterplay.addEventListener('click', () => {
-    if (audioelement.paused || audioelement.currentTime <= 0) {
-        audioelement.play();
-        masterplay.classList.remove('fa-circle-play');
-        masterplay.classList.add('fa-circle-pause');
-        gif.style.opacity = 1;
-        // Update the corresponding small play button
-        makeallplays();
-        songitemplays[songindex].classList.remove('fa-circle-play');
-        songitemplays[songindex].classList.add('fa-circle-pause');
+// Update play buttons state and song poster
+const updatePlayState = (isPlaying) => {
+    if (isPlaying) {
+        masterPlay.classList.remove('fa-circle-play');
+        masterPlay.classList.add('fa-circle-pause');
+        songItemPlays[songIndex]?.classList.remove('fa-circle-play');
+        songItemPlays[songIndex]?.classList.add('fa-circle-pause');
     } else {
-        audioelement.pause();
-        masterplay.classList.remove('fa-circle-pause');
-        masterplay.classList.add('fa-circle-play');
-        gif.style.opacity = 0;
-        // Update the small play button
-        songitemplays[songindex].classList.remove('fa-circle-pause');
-        songitemplays[songindex].classList.add('fa-circle-play');
+        masterPlay.classList.remove('fa-circle-pause');
+        masterPlay.classList.add('fa-circle-play');
+        songItemPlays[songIndex]?.classList.remove('fa-circle-pause');
+        songItemPlays[songIndex]?.classList.add('fa-circle-play');
+    }
+    
+    // Update song poster
+    songPoster.src = songs[songIndex].coverPath;
+};
+
+// Handle master play button
+masterPlay.addEventListener('click', () => {
+    if (audioElement.paused || audioElement.currentTime <= 0) {
+        audioElement.play()
+            .then(() => updatePlayState(true))
+            .catch(error => console.error("Playback failed:", error));
+    } else {
+        audioElement.pause();
+        updatePlayState(false);
     }
 });
 
-// Listen to time updates
-audioelement.addEventListener('timeupdate', () => { 
-    let progress = parseInt((audioelement.currentTime / audioelement.duration) * 100);
-    myprogressbar.value = progress;
-});
-
-// Seekbar change event
-myprogressbar.addEventListener('change', () => {
-    audioelement.currentTime = myprogressbar.value * audioelement.duration / 100;
-});
-
-// Play song from individual song item
-songitemplays.forEach((element, i) => {
-    element.addEventListener('click', (e) => { 
-        makeallplays();
-        songindex = i;  // Update song index
-        e.target.classList.remove('fa-circle-play');
-        e.target.classList.add('fa-circle-pause');
-        audioelement.src = songs[songindex].filepath;
-        mastersongname.innerText = songs[songindex].songname;
-        audioelement.currentTime = 0;
-        audioelement.play();
-        gif.style.opacity = 1;
-        masterplay.classList.remove('fa-circle-play');
-        masterplay.classList.add('fa-circle-pause');
+// Play song from song list
+songItemPlays.forEach((element, i) => {
+    element.addEventListener('click', () => {
+        makeAllPlays();
+        
+        if (songIndex === i && !audioElement.paused) {
+            audioElement.pause();
+            updatePlayState(false);
+        } else {
+            songIndex = i;
+            updateSongUI();
+        }
     });
 });
 
-// Function to update UI when changing song via next/prev
+// Next & Previous Buttons
+document.getElementById('next').addEventListener('click', () => {
+    songIndex = (songIndex + 1) % songs.length;
+    updateSongUI();
+});
+
+document.getElementById('previous').addEventListener('click', () => {
+    songIndex = (songIndex - 1 + songs.length) % songs.length;
+    updateSongUI();
+});
+
+// Update UI when song changes
 const updateSongUI = () => {
-    makeallplays();
-    audioelement.src = songs[songindex].filepath;
-    mastersongname.innerText = songs[songindex].songname;
-    audioelement.currentTime = 0;
-    audioelement.play();
-    masterplay.classList.remove('fa-circle-play');
-    masterplay.classList.add('fa-circle-pause');
-    gif.style.opacity = 1;
-    songitemplays[songindex].classList.remove('fa-circle-play');
-    songitemplays[songindex].classList.add('fa-circle-pause');
+    makeAllPlays();
+    audioElement.src = songs[songIndex].filePath;
+    masterSongName.innerText = songs[songIndex].songName;
+    audioElement.currentTime = 0;
+    audioElement.play()
+        .then(() => updatePlayState(true))
+        .catch(error => console.error("Playback failed:", error));
 };
 
-// Next song
-document.getElementById('next').addEventListener('click', () => {
-    if (songindex >= songs.length - 1) {
-        songindex = 0;
-    } else {
-        songindex += 1;
+// Progress Bar Update
+audioElement.addEventListener('timeupdate', () => {
+    if (audioElement.duration) {
+        myProgressBar.value = (audioElement.currentTime / audioElement.duration) * 100;
     }
+});
+
+// Seekbar change event
+myProgressBar.addEventListener('input', () => {
+    audioElement.currentTime = (myProgressBar.value * audioElement.duration) / 100;
+});
+
+// When song ends, play next
+audioElement.addEventListener('ended', () => {
+    songIndex = (songIndex + 1) % songs.length;
     updateSongUI();
 });
 
-// Previous song
-document.getElementById('previous').addEventListener('click', () => {
-    if (songindex <= 0) {
-        songindex = songs.length - 1;
-    } else {
-        songindex -= 1;
-    }
-    updateSongUI();
-});
+// Sync buttons with audio state
+audioElement.addEventListener('play', () => updatePlayState(true));
+audioElement.addEventListener('pause', () => updatePlayState(false));
+
+// Initial setup
+masterSongName.innerText = songs[songIndex].songName;
+songPoster.src = songs[songIndex].coverPath;
